@@ -31,12 +31,33 @@ router.get('/', getExpenses);
 router.get('/monthly-total', getMonthlyTotal);
 router.get('/admin/all', adminOnly, getAllExpensesAdmin);
 router.get('/:id', param('id').isMongoId().withMessage('Invalid expense ID'), validate, getExpenseById);
+// router.put(
+//   '/:id',
+//   [param('id').isMongoId().withMessage('Invalid expense ID'), ...expenseValidationRules.map(r => r.optional())],
+//   validate,
+//   updateExpense
+// );
+const expenseUpdateValidationRules = [
+  body('title').optional().trim().notEmpty().withMessage('Title cannot be empty'),
+  body('amount').optional().isFloat({ min: 0 }).withMessage('Amount must be a positive number'),
+  body('category')
+    .optional()
+    .isIn(['Food', 'Travel', 'Bills', 'Shopping', 'Other'])
+    .withMessage('Invalid category'),
+  body('date').optional().isISO8601().withMessage('Date must be a valid date')
+];
+
 router.put(
   '/:id',
-  [param('id').isMongoId().withMessage('Invalid expense ID'), ...expenseValidationRules.map(r => r.optional())],
+  [param('id').isMongoId().withMessage('Invalid expense ID'), ...expenseUpdateValidationRules],
   validate,
   updateExpense
 );
+
+
+
+
+
 router.delete('/:id', param('id').isMongoId().withMessage('Invalid expense ID'), validate, deleteExpense);
 
 module.exports = router;
